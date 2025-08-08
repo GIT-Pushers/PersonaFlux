@@ -51,17 +51,6 @@ interface CharacterGenerationRequest {
 }
 
 /**
- * Interface for AI-generated character response
- */
-interface CharacterGenerationResponse {
-  backstory: string;
-  story_context: string;
-  starting_propt: string; // Note: Keeping typo for database compatibility
-  start_options: string[];
-  ending_scenes: string[];
-}
-
-/**
  * POST /api/generate - Generate AI-powered NPC character
  * 
  * Leverages Google Gemini 1.5 Flash to create comprehensive character profiles

@@ -3,26 +3,10 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation"; // Import the router
-import { Check, ChevronsUpDown, User, BookOpen } from "lucide-react";
+import { Check, User, BookOpen } from "lucide-react";
 
 // Shadcn/UI Component Imports
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import { createClient } from "@/utils/supabase/client";
@@ -56,78 +40,6 @@ interface CharacterFormData {
 }
 
 // --- REUSABLE & SUB-COMPONENTS ---
-
-// MultiSelect and FormSidebar components remain unchanged...
-export const MultiSelect = React.forwardRef<
-  HTMLButtonElement,
-  {
-    options: { value: string; label: string }[];
-    value: string[];
-    onChange: (value: string[]) => void;
-  }
->(({ options, value, onChange }, ref) => {
-  const [open, setOpen] = useState(false);
-  const selectedLabels = options
-    .filter((o) => value.includes(o.value))
-    .map((o) => o.label);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          ref={ref}
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between h-auto min-h-10"
-        >
-          <div className="flex flex-wrap gap-1">
-            {selectedLabels.length > 0 ? (
-              selectedLabels.map((label) => (
-                <Badge key={label} variant="secondary">
-                  {label}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-muted-foreground">Select traits...</span>
-            )}
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
-          <CommandInput placeholder="Search traits..." />
-          <CommandList>
-            <CommandEmpty>No trait found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    const newValues = value.includes(option.value)
-                      ? value.filter((v) => v !== option.value)
-                      : [...value, option.value];
-                    onChange(newValues);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value.includes(option.value) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-});
-MultiSelect.displayName = "MultiSelect";
 
 const FormSidebar = ({ currentStep }: { currentStep: number }) => (
   <div className="flex h-full flex-col p-8 lg:p-12 bg-muted/50 border-r">

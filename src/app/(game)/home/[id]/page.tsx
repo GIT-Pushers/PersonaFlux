@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, Loader2, Move } from "lucide-react";
 import { motion } from "framer-motion";
@@ -32,7 +32,6 @@ const Home = () => {
   const [storyHistory, setStoryHistory] = useState<string[]>([]);
   const [currentOptions, setCurrentOptions] = useState<string[]>([]);
   const [currentScene, setCurrentScene] = useState(1);
-  const [isGameStarted, setIsGameStarted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -51,8 +50,8 @@ const Home = () => {
       handleGameComplete();
       return;
     }
-  }, [currentScene, character?.no_of_scenes]);
-  const mockCharacter: Character = {
+  }, [currentScene, character?.no_of_scenes, router]);
+  const mockCharacter: Character = useMemo(() => ({
     id: 1,
     character_name: "Aria the Brave",
     avatar_url: "/male/male1/char.png",
@@ -69,7 +68,7 @@ const Home = () => {
       "Search the entrance for any clues or traps",
     ],
     no_of_scenes: 10,
-  };
+  }), []);
 
   const fetchCharacterFromSupabase = async (characterId: number) => {
     setIsGenerating(true);
@@ -81,11 +80,11 @@ const Home = () => {
       return {
         id: data.id,
         character_name: data.character_name,
-        avatar_url: data.avatar_url,
+        avatar_url: data.avatar_url || null,
         traits: data.traits || [],
         backstory: data.backstory || "No backstory available.",
         story_context: data.story_context || "The adventure begins...",
-        starting_propt: data.starting_prompt || "Your story starts here...",
+        starting_propt: data.starting_propt || "Your story starts here...",
         start_options: data.start_options || [
           "Continue",
           "Look around",
@@ -94,15 +93,16 @@ const Home = () => {
         no_of_scenes: data.no_of_scenes || 5,
         language: data.language || "English",
       };
-    } catch (err: any) {
-      setError(`Failed to load character: ${err.message || "Unknown error"}`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(`Failed to load character: ${errorMessage}`);
       return null;
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const startGame = async (characterId?: number) => {
+  const startGame = useCallback(async (characterId?: number) => {
     const gameCharacter = characterId
       ? await fetchCharacterFromSupabase(characterId)
       : mockCharacter;
@@ -112,10 +112,9 @@ const Home = () => {
       gameCharacter.starting_propt || "The adventure begins...",
     ]);
     setCurrentOptions(gameCharacter.start_options || []);
-    setIsGameStarted(true);
     setCurrentScene(1);
     setError(null);
-  };
+  }, [mockCharacter]);
 
   const handleOptionSelect = async (selectedOption: string) => {
     if (!character || isGenerating) return;
@@ -167,7 +166,7 @@ const Home = () => {
       } else {
         setError(result.error || "Failed to generate story continuation");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to generate next scene. Please try again.");
     } finally {
       setIsGenerating(false);
@@ -175,7 +174,6 @@ const Home = () => {
   };
 
   const resetGame = () => {
-    setIsGameStarted(false);
     setCharacter(null);
     setStoryHistory([]);
     setCurrentOptions([]);
@@ -189,8 +187,10 @@ const Home = () => {
     setCurrentImage((prev) => (prev >= 6 ? 1 : prev + 1));
 
   useEffect(() => {
-    startGame(parseInt(characterId as string));
-  }, []);
+    if (characterId) {
+      startGame(parseInt(characterId as string));
+    }
+  }, [characterId, startGame]);
 
   useEffect(() => {
     if (chatEndRef.current) {
