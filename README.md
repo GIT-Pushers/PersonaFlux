@@ -1,6 +1,6 @@
 "# 🎮 PersonaFlux: AI-Powered Dynamic NPC Generation Platform
 
-## **🏆 CodeZilla '25 Submission - Problem Statement GAI3**
+## **🏆 CodeZilla '25 Submission - Problem Statement GAI3*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
