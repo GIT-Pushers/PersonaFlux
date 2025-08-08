@@ -1,0 +1,32 @@
+{
+  "name": "personaflux-tests",
+  "version": "2.0.0",
+  "description": "Comprehensive testing suite for PersonaFlux AI Character Platform",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:personality": "vitest personality-consistency.test.ts",
+    "test:content-filtering": "vitest content-filtering.test.ts",
+    "test:performance": "vitest performance-latency.test.ts",
+    "test:ai-evaluation": "npm run test:personality && npm run test:content-filtering && npm run test:performance",
+    "demo:load-characters": "node scripts/load-demo-characters.js",
+    "demo:interactive": "node scripts/interactive-demo.js",
+    "demo:test-scenarios": "node scripts/test-scenarios.js",
+    "benchmark:performance": "node scripts/performance-benchmark.js",
+    "validate:safety": "node scripts/safety-validation.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "vitest": "^1.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "cross-fetch": "^4.0.0"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

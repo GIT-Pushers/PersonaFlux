@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
-import { getCharactersByEmail } from "@/service/service"; // Adjust the import path
+import { getCharactersByEmail, deleteCharacterById } from "@/service/service"; // Adjust the import path
 
 // Import Shadcn/UI components
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Card,
@@ -24,11 +25,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Play, Eye } from "lucide-react";
+import { PlusCircle, Play, Eye, Trash2 } from "lucide-react";
 
 // Define a type for the character data to ensure type safety
 interface Character {
-  id: number; // Changed to number to match the database schema
+  id: number;
   character_name: string;
   avatar_url: string | null;
   traits: string[];
@@ -51,6 +52,10 @@ const Dashboard = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null
   );
+  const [characterToDelete, setCharacterToDelete] = useState<Character | null>(
+    null
+  );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -84,6 +89,27 @@ const Dashboard = () => {
 
     fetchUserAndCharacters();
   }, []);
+
+  // Function to handle the deletion of a character
+  const handleDeleteCharacter = async () => {
+    if (!characterToDelete) return;
+
+    const { error: deleteError } = await deleteCharacterById(
+      characterToDelete.id
+    );
+
+    if (deleteError) {
+      setError(deleteError.message);
+    } else {
+      // Remove the character from the state to update the UI
+      setCharacters(
+        characters.filter((char) => char.id !== characterToDelete.id)
+      );
+    }
+    // Close the dialog
+    setIsDeleteDialogOpen(false);
+    setCharacterToDelete(null);
+  };
 
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -168,15 +194,29 @@ const Dashboard = () => {
                       {char.character_name}
                     </CardTitle>
                   </CardHeader>
-                  <CardFooter className="p-4 grid grid-cols-2 gap-2">
+                  <CardFooter className="p-2 grid grid-cols-3 gap-2">
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => setSelectedCharacter(char)}
                     >
-                      <Eye className="mr-2 h-4 w-4" /> Details
+                      <Eye className="mr-1 h-4 w-4" /> Details
                     </Button>
-                    <Button onClick={() => router.push(`/home/${char.id}`)}>
-                      <Play className="mr-2 h-4 w-4" /> Play
+                    <Button
+                      size="sm"
+                      onClick={() => router.push(`/home/${char.id}`)}
+                    >
+                      <Play className="mr-1 h-4 w-4" /> Play
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setCharacterToDelete(char);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="mr-1 h-4 w-4" /> Delete
                     </Button>
                   </CardFooter>
                 </Card>
@@ -334,6 +374,31 @@ const Dashboard = () => {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the
+              character{" "}
+              <span className="font-bold">
+                {characterToDelete?.character_name}
+              </span>
+              .
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleDeleteCharacter}>
+              Delete
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

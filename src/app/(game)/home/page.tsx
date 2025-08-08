@@ -75,7 +75,7 @@ const Home = () => {
         const supabaseCharacter: Character = {
           id: data.id,
           character_name: data.character_name,
-          avatar_url: data.avatar_url,
+          avatar_url: data.avatar_url || null,
           traits: data.traits || [],
           backstory: data.backstory || "No backstory available.",
           story_context: data.story_context || "The adventure begins...",

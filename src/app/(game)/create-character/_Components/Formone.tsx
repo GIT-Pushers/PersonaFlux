@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ComboBox"; // Assuming this is the correct path
-import { MultiSelect } from "../page"; // Adjust path if needed
+import { MultiSelect } from "@/components/ui/multiSelect"; // Use from components folder
 import { TRAIT_OPTIONS } from "@/lib/traitsOptions";
 import { LANGUAGE_OPTIONS } from "@/lib/Language";
 

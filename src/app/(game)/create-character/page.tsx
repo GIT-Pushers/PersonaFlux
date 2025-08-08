@@ -3,32 +3,17 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation"; // Import the router
-import { Check, ChevronsUpDown, User, BookOpen } from "lucide-react";
+import { Check, User, BookOpen } from "lucide-react";
 
 // Shadcn/UI Component Imports
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import { createClient } from "@/utils/supabase/client";
 import { createCharacter } from "@/service/service";
 import { StepTwoForm } from "./_Components/FormTwo";
 import { StepOneForm } from "./_Components/Formone";
+import { toast } from "sonner";
 
 // --- DATA & TYPES ---
 
@@ -55,78 +40,6 @@ interface CharacterFormData {
 }
 
 // --- REUSABLE & SUB-COMPONENTS ---
-
-// MultiSelect and FormSidebar components remain unchanged...
-export const MultiSelect = React.forwardRef<
-  HTMLButtonElement,
-  {
-    options: { value: string; label: string }[];
-    value: string[];
-    onChange: (value: string[]) => void;
-  }
->(({ options, value, onChange }, ref) => {
-  const [open, setOpen] = useState(false);
-  const selectedLabels = options
-    .filter((o) => value.includes(o.value))
-    .map((o) => o.label);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          ref={ref}
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between h-auto min-h-10"
-        >
-          <div className="flex flex-wrap gap-1">
-            {selectedLabels.length > 0 ? (
-              selectedLabels.map((label) => (
-                <Badge key={label} variant="secondary">
-                  {label}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-muted-foreground">Select traits...</span>
-            )}
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
-          <CommandInput placeholder="Search traits..." />
-          <CommandList>
-            <CommandEmpty>No trait found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    const newValues = value.includes(option.value)
-                      ? value.filter((v) => v !== option.value)
-                      : [...value, option.value];
-                    onChange(newValues);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value.includes(option.value) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-});
-MultiSelect.displayName = "MultiSelect";
 
 const FormSidebar = ({ currentStep }: { currentStep: number }) => (
   <div className="flex h-full flex-col p-8 lg:p-12 bg-muted/50 border-r">
@@ -233,7 +146,7 @@ const CharacterForm = () => {
   const handleGenerateStory = async () => {
     const isValid = await form.trigger(stepOneFields);
     if (!isValid) {
-      alert(
+      toast.error(
         "Please fill in all required basic details before generating with AI."
       );
       return;
@@ -280,7 +193,7 @@ const CharacterForm = () => {
       form.setValue("ending_scenes", endingScenes, { shouldValidate: true });
     } catch (error) {
       console.error("Failed to generate story:", error);
-      alert(
+      toast.error(
         "Sorry, something went wrong while generating the story. Please try again."
       );
     } finally {
@@ -338,7 +251,7 @@ const CharacterForm = () => {
           (scene) => scene && scene.trim() !== ""
         ),
         avatar_url: finalAvatarUrl,
-        email: session.user.email, 
+        email: session.user.email,
       };
 
       console.log("📤 Final character data for Supabase:", characterToInsert);
@@ -349,11 +262,11 @@ const CharacterForm = () => {
         throw new Error(insertError.message);
       }
 
-      alert("Character created and saved successfully!");
+      toast.success("Character created and saved successfully!");
       router.push("/dashboard");
     } catch (error) {
       console.error("Submission Error:", error);
-      alert(
+      toast.error(
         `Failed to create character: ${
           error instanceof Error ? error.message : "An unknown error occurred."
         }`
@@ -371,7 +284,7 @@ const CharacterForm = () => {
   const prevStep = () => setStep(1);
 
   return (
-    <div className="grid md:grid-cols-12 min-h-screen w-screen bg-background">
+    <div className="grid md:grid-cols-12 min-h-screen w-screen bg-background mt-15">
       <div className="hidden h-full md:block md:col-span-5 lg:col-span-4">
         <FormSidebar currentStep={step} />
       </div>
