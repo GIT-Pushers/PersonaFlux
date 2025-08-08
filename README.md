@@ -908,14 +908,7 @@ test(api): add character creation test suite
 - **Be Constructive**: Provide helpful feedback and suggestions
 - **Be Patient**: Allow time for review and discussion
 
-### **Recognition**
 
-Contributors are recognized in our:
-
-- Contributors page on the website
-- Monthly contributor spotlight
-- GitHub repository contributors list
-- Annual community awards
 
 ## 📄 License
 
@@ -975,22 +968,16 @@ Special thanks to our 12K+ active developers and community members who have cont
 
 ## 📊 Project Stats
 
-- **NPCs Generated**: 5M+
-- **Active Developers**: 12K+
+- **NPCs Generated**: 1000+
 - **Supported Languages**: 145+
 - **Character Traits Available**: 200+
 - **API Uptime**: 99.99%
 - **Average Generation Time**: <2 seconds
-- **Database Records**: 2M+ characters
-- **Active Communities**: 50+ game studios
+- **Database Records**: 10000+ characters
 
 ## 🏆 **Awards & Recognition**
 
-- **🏆 "Best AI Innovation"** - TechCrunch Disrupt 2024
-- **🌟 "Developer Choice Award"** - Game Developers Conference
-- **⭐ GitHub Trending** - #1 in AI/Gaming category
-- **📊 Product Hunt** - #2 Product of the Day
-- **🎮 Game Developers Choice**: Innovation in AI category
+
 
 ## 🎯 **Why PersonaFlux Wins CodeZilla '25**
 
