@@ -908,8 +908,6 @@ test(api): add character creation test suite
 - **Be Constructive**: Provide helpful feedback and suggestions
 - **Be Patient**: Allow time for review and discussion
 
-
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -937,7 +935,6 @@ Special thanks to our 12K+ active developers and community members who have cont
 - 🧪 **Beta Testers**: Early adopters providing valuable feedback
 - 🌍 **Localization Team**: 145+ language translations
 
-
 ## 📊 Project Stats
 
 - **NPCs Generated**: 1000+
@@ -946,7 +943,6 @@ Special thanks to our 12K+ active developers and community members who have cont
 - **API Uptime**: 99.99%
 - **Average Generation Time**: <2 seconds
 - **Database Records**: 10000+ characters
-
 
 ## 🎯 **Why PersonaFlux Wins CodeZilla '25**
 
@@ -965,7 +961,7 @@ Special thanks to our 12K+ active developers and community members who have cont
 
 ## 🔗 **CodeZilla '25 Links**
 
-- **🌟 Live Demo**: [personaflux-demo.vercel.app](https://personaflux-demo.vercel.app)
+- **🌟 Live Demo**: [personaflux-demo.vercel.app](https://persona-flux.vercel.app/login)
 - **📖 Complete Documentation**: [docs.personaflux.dev](https://docs.personaflux.dev)
 - **🔗 GitHub Repository**: [github.com/GIT-Pushers/PersonaFlux](https://github.com/GIT-Pushers/PersonaFlux)
 - **🎮 API Reference**: [api.personaflux.dev](https://api.personaflux.dev)
