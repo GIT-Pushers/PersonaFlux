@@ -1,12 +1,22 @@
 {
   "name": "personaflux",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "cd tests && npm test",
+    "test:watch": "cd tests && npm run test:watch",
+    "test:coverage": "cd tests && npm run test:coverage",
+    "test:ai-evaluation": "cd tests && npm run test:ai-evaluation",
+    "demo:interactive": "cd demo && node scripts/interactive-demo.js",
+    "demo:load-characters": "cd demo && node scripts/load-demo-characters.js",
+    "benchmark:performance": "cd tests && npm run benchmark:performance",
+    "validate:safety": "cd tests && npm run validate:safety",
+    "setup:tests": "cd tests && npm install",
+    "docs:generate": "node scripts/generate-docs.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
