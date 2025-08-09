@@ -16,9 +16,10 @@ interface Character {
   traits: string[];
   backstory: string;
   story_context: string;
-  starting_propt?: string;
+  starting_prompt?: string;
   start_options: string[];
   no_of_scenes: number;
+
 }
 
 const Home = () => {
@@ -47,7 +48,7 @@ const Home = () => {
       "A fearless warrior who has traveled across many realms seeking adventure and justice.",
     story_context:
       "Standing at the entrance of an ancient dungeon, rumors of treasure and danger echo in the air.",
-    starting_propt:
+    starting_prompt:
       "The ancient stone door creaks open, revealing darkness beyond. A cold wind carries whispers of forgotten secrets.",
     start_options: [
       "Light a torch and step boldly into the darkness",
@@ -79,7 +80,7 @@ const Home = () => {
           traits: data.traits || [],
           backstory: data.backstory || "No backstory available.",
           story_context: data.story_context || "The adventure begins...",
-          starting_propt: data.starting_propt || "Your story starts here...", // Use correct field name
+          starting_prompt: data.starting_prompt || "Your story starts here...", // Use correct field name
           start_options: data.start_options || [
             "Continue",
             "Look around",
@@ -120,7 +121,7 @@ const Home = () => {
     if (gameCharacter) {
       setCharacter(gameCharacter);
       setStoryHistory([
-        gameCharacter.starting_propt || "The adventure begins...",
+        gameCharacter.starting_prompt || "The adventure begins...",
       ]);
       setCurrentOptions(gameCharacter.start_options || []);
       setIsGameStarted(true);
