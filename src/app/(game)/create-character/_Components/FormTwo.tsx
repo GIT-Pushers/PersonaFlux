@@ -47,7 +47,7 @@ interface CharacterFormData {
   avatar_url?: string; // Add this for default avatar selection
   backstory?: string;
   story_context?: string;
-  starting_propt?: string;
+  starting_prompt?: string;
   start_options: string[];
   ending_scenes: string[];
 }
@@ -277,7 +277,7 @@ export const StepTwoForm = ({
         />
         <FormField
           control={form.control}
-          name="starting_propt"
+          name="starting_prompt"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Starting Prompt</FormLabel>

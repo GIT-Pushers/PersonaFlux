@@ -34,7 +34,7 @@ interface CharacterFormData {
   avatar_url?: string; // Add this for default avatar selection
   backstory?: string;
   story_context?: string;
-  starting_propt?: string;
+  starting_prompt?: string;
   start_options: string[];
   ending_scenes: string[];
 }
@@ -135,7 +135,7 @@ const CharacterForm = () => {
       language: "",
       backstory: "",
       story_context: "",
-      starting_propt: "",
+      starting_prompt: "",
       start_options: ["", "", ""],
       ending_scenes: ["", "", ""],
       avatar: undefined,
@@ -172,7 +172,7 @@ const CharacterForm = () => {
       form.setValue("story_context", generatedData.story_context, {
         shouldValidate: true,
       });
-      form.setValue("starting_propt", generatedData.starting_propt, {
+      form.setValue("starting_prompt", generatedData.starting_prompt, {
         shouldValidate: true,
       });
 
@@ -243,7 +243,7 @@ const CharacterForm = () => {
         language: data.language,
         backstory: data.backstory,
         story_context: data.story_context,
-        starting_propt: data.starting_propt, // Keep the typo to match database schema
+        starting_prompt: data.starting_prompt,
         start_options: data.start_options.filter(
           (opt) => opt && opt.trim() !== ""
         ),

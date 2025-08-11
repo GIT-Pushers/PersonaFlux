@@ -34,7 +34,7 @@ import { createClient } from "@/utils/supabase/client";
  * @property {string|null} [avatar_url] - URL or base64 string for character avatar
  * @property {string} [backstory] - AI-generated character background
  * @property {string} [story_context] - World setting and context
- * @property {string} [starting_propt] - Initial interaction prompt (note: keeping typo for DB compatibility)
+ * @property {string} [starting_prompt] - Initial interaction prompt
  * @property {string[]} start_options - Array of initial dialogue choices
  * @property {string[]} ending_scenes - Array of possible story conclusions
  * @property {string} [user_email] - Email of the character creator (deprecated - use email)
@@ -50,7 +50,7 @@ export interface CharacterInsertData {
   avatar_url?: string | null;
   backstory?: string;
   story_context?: string;
-  starting_propt?: string; // Keep the typo to match database schema
+  starting_prompt?: string;
   start_options: string[];
   ending_scenes: string[];
   user_email?: string; // Changed from user_id to user_email
@@ -245,7 +245,7 @@ export async function getCharactersByEmail(
         avatar_url,
         backstory,
         story_context,
-        starting_propt,
+        starting_prompt,
         start_options,
         ending_scenes,
         email,

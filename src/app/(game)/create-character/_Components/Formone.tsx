@@ -35,7 +35,7 @@ interface CharacterFormData {
   avatar?: FileList;
   backstory?: string;
   story_context?: string;
-  starting_propt?: string;
+  starting_prompt?: string;
   start_options: string[];
   ending_scenes: string[];
 }

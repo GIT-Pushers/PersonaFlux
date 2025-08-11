@@ -40,7 +40,7 @@ interface Character {
   voice_name: string;
   no_of_scenes: number;
   language: string;
-  starting_propt?: string;
+  starting_prompt?: string;
   start_options: string[];
   ending_scenes: string[];
 }
@@ -328,7 +328,7 @@ const Dashboard = () => {
                   </h3>
                   <p className="text-sm text-muted-foreground italic border-l-4 pl-3">
                     `
-                    {selectedCharacter.starting_propt ||
+                    {selectedCharacter.starting_prompt ||
                       "No starting prompt provided."}
                     `
                   </p>

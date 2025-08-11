@@ -16,9 +16,14 @@ interface Character {
   traits: string[];
   backstory: string;
   story_context: string;
-  starting_propt?: string;
+  starting_prompt?: string;
   start_options: string[];
   no_of_scenes: number;
+  language?: string;
+  age?: number;
+  gender?: string;
+  voice_name?: string;
+  ending_scenes?: string[];
 }
 
 const Home = () => {
@@ -47,7 +52,7 @@ const Home = () => {
       "A fearless warrior who has traveled across many realms seeking adventure and justice.",
     story_context:
       "Standing at the entrance of an ancient dungeon, rumors of treasure and danger echo in the air.",
-    starting_propt:
+    starting_prompt:
       "The ancient stone door creaks open, revealing darkness beyond. A cold wind carries whispers of forgotten secrets.",
     start_options: [
       "Light a torch and step boldly into the darkness",
@@ -55,6 +60,15 @@ const Home = () => {
       "Search the entrance for any clues or traps",
     ],
     no_of_scenes: 10,
+    language: "English",
+    age: 28,
+    gender: "Female",
+    voice_name: "Alloy",
+    ending_scenes: [
+      "You emerge victorious with ancient treasures",
+      "You sacrifice yourself to save others",
+      "You disappear into the mystical realm forever",
+    ],
   };
 
   // Fetch character from Supabase
@@ -79,13 +93,18 @@ const Home = () => {
           traits: data.traits || [],
           backstory: data.backstory || "No backstory available.",
           story_context: data.story_context || "The adventure begins...",
-          starting_propt: data.starting_propt || "Your story starts here...", // Use correct field name
+          starting_prompt: data.starting_prompt || "Your story starts here...", // Use correct field name
           start_options: data.start_options || [
             "Continue",
             "Look around",
             "Wait",
           ],
           no_of_scenes: data.no_of_scenes || 5,
+          language: data.language || "English",
+          age: data.age,
+          gender: data.gender,
+          voice_name: data.voice_name,
+          ending_scenes: data.ending_scenes || [],
         };
         return supabaseCharacter;
       } else {
@@ -120,7 +139,7 @@ const Home = () => {
     if (gameCharacter) {
       setCharacter(gameCharacter);
       setStoryHistory([
-        gameCharacter.starting_propt || "The adventure begins...",
+        gameCharacter.starting_prompt || "The adventure begins...",
       ]);
       setCurrentOptions(gameCharacter.start_options || []);
       setIsGameStarted(true);
@@ -152,19 +171,22 @@ const Home = () => {
     setError(null);
 
     try {
-      // Prepare data for the AI API
+      // Send entire character data to AI for better context
       const requestData = {
         character_name: character.character_name,
-        age: 25,
-        gender: "Unknown",
+        age: character.age || 25,
+        gender: character.gender || "Unknown",
         traits: character.traits,
         backstory: character.backstory,
-        story_context: `${
-          character.story_context
-        }\n\nStory so far: ${storyHistory.slice(-2).join(" ")}`,
-        voice_name: "Alloy",
-        language: "English",
-        starting_prompt: `The user chose: "${selectedOption}". Continue the story and provide 3 new choices.`,
+        story_context: character.story_context,
+        ending_scenes: character.ending_scenes || [],
+        voice_name: character.voice_name || "Alloy",
+        language: character.language || "English",
+        starting_prompt: `The user chose: "${selectedOption}". Continue the story and provide 3 new choices. Story so far: ${storyHistory
+          .slice(-2)
+          .join(" ")}`,
+        current_scene: currentScene,
+        total_scenes: character.no_of_scenes || 5,
       };
 
       console.log("🎮 Sending story continuation request:", requestData);
@@ -181,22 +203,45 @@ const Home = () => {
       console.log("🎮 Story continuation response:", result);
 
       if (result.success) {
-        // Add user choice and AI response to story history
+        // Generate a description of the event that happens after the player's choice
+        const eventDescription = `You chose: ${selectedOption}`;
         const newStory = result.npc_dialogue.join(" ");
-        setStoryHistory([
-          ...storyHistory,
-          `You chose: ${selectedOption}`,
-          newStory,
-        ]);
+
+        setStoryHistory([...storyHistory, eventDescription, newStory]);
         setCurrentOptions(result.player_options || []);
 
-        // Check if game should end
-        if (currentScene >= character.no_of_scenes) {
-          setCurrentOptions([
-            "End Adventure",
-            "Start New Adventure",
-            "Continue Exploring",
-          ]);
+        // Check if game should end based on scenes or story progression
+        const isNearEnd = currentScene >= (character.no_of_scenes || 5) - 1;
+        const hasEndingKeywords =
+          newStory.toLowerCase().includes("end") ||
+          newStory.toLowerCase().includes("conclude") ||
+          newStory.toLowerCase().includes("final");
+
+        if (isNearEnd || hasEndingKeywords) {
+          console.log("🎮 Game approaching ending...");
+          console.log("📊 Game Stats:", {
+            character: character.character_name,
+            scenes_played: currentScene,
+            total_scenes: character.no_of_scenes,
+            choices_made:
+              storyHistory.filter((item) => item.startsWith("You chose:"))
+                .length + 1,
+            story_length: storyHistory.join(" ").length,
+          });
+
+          // Check if this is the final scene
+          if (currentScene >= (character.no_of_scenes || 5)) {
+            console.log("🏁 GAME ENDED!");
+            console.log("📖 Complete Story:", storyHistory.join("\n"));
+            console.log("🎭 Character:", character);
+            setCurrentOptions([
+              "End Adventure",
+              "Start New Adventure",
+              "Continue Exploring",
+            ]);
+          } else {
+            setCurrentScene(currentScene + 1);
+          }
         } else {
           setCurrentScene(currentScene + 1);
         }

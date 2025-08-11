@@ -81,7 +81,7 @@ Your response must be a single valid JSON object in the following structure, usi
 {
   "backstory": "2–3 paragraphs about the character’s origin, motivations, and past life.",
   "story_context": "A 2-paragraph description of the current world/situation the character is in (sci-fi, fantasy, dystopia, etc.).",
-  "starting_propt": "A single sentence that begins the player's interaction with the character.",
+  "starting_prompt": "A single sentence that begins the player's interaction with the character.",
   "start_options": [
     "First possible player choice or reply",
     "Second creative alternative",

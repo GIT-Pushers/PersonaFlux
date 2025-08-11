@@ -17,9 +17,12 @@ export async function POST(req: NextRequest) {
       traits,
       backstory,
       story_context,
+      ending_scenes,
       voice_name,
       language,
       starting_prompt,
+      current_scene,
+      total_scenes,
     } = body;
 
     console.log("🔍 Extracted fields:");
@@ -57,7 +60,15 @@ export async function POST(req: NextRequest) {
     console.log("🤖 Calling Google AI with prompt...");
 
     const prompt = `
-You are an AI NPC in a 2D retro RPG game.
+You are the game logic AI. You receive the full character data and the current game state.
+Your task:
+1. Use the character's backstory, story, and ending scenes to guide the narrative.
+2. Each turn:
+   - Generate a vivid description of the event that happens after the player's choice.
+   - Provide the next prompt for the player.
+   - Provide a small set of next options for the player to choose from, leading naturally toward the ending story.
+3. Keep the flow consistent with the character's personality and previous events.
+4. Ensure the story eventually reaches an ending scene based on the player's choices.
 
 Character:
 - Name: ${character_name}
@@ -66,9 +77,11 @@ Character:
 - Traits: ${traits.join(", ")}
 - Backstory: ${backstory || "No backstory provided"}
 - Story Context: ${story_context || "No story context provided"}
+- Ending Scenes: ${ending_scenes ? ending_scenes.join(", ") : "None provided"}
 - Voice Style: ${voice_name || "Default"}
 - Language: ${language || "English"}   
 
+Game Progress: Scene ${current_scene || 1} of ${total_scenes || 5}
 Current Prompt: ${starting_prompt || "Begin the conversation"}
 
 Return the following **exact JSON** format:
@@ -90,6 +103,10 @@ Rules:
 - Each sentence must be one element of the npc_dialogue array.
 - Only 3 player options.
 - Dialogue should reflect the character's traits, story, and tone.
+- Progress the story toward one of the ending scenes based on player choices.
+- If near the end (scene ${current_scene || 1} of ${
+      total_scenes || 5
+    }), start building toward conclusion.
     `;
 
     const result = await model.generateContent(prompt);
