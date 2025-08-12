@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 
 import { useChar } from "@/store/useChar";
 import NPCBubble from "@/components/NpcBubble";
-import { getCharacterById } from "@/service/service";
+import { getCharacterById, saveGameLog, GameTurn } from "@/service/service";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
@@ -44,6 +44,13 @@ const Home = () => {
   const [currentScene, setCurrentScene] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // New state for game logging and animation
+  const [gameLog, setGameLog] = useState<GameTurn[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [currentDescription, setCurrentDescription] = useState("");
+  const [displayedDescription, setDisplayedDescription] = useState("");
+  const [typingIndex, setTypingIndex] = useState(0);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   useEffect(() => {
@@ -61,6 +68,24 @@ const Home = () => {
       return;
     }
   }, [currentScene, character?.no_of_scenes, router]);
+
+  // Typing animation effect
+  useEffect(() => {
+    if (currentDescription && isTyping) {
+      if (typingIndex < currentDescription.length) {
+        const timer = setTimeout(() => {
+          setDisplayedDescription(currentDescription.slice(0, typingIndex + 1));
+          setTypingIndex(typingIndex + 1);
+        }, 30); // Adjust speed here (lower = faster)
+
+        return () => clearTimeout(timer);
+      } else {
+        setIsTyping(false);
+        // Add the complete description to story history when typing is done
+        setStoryHistory((prev) => [...prev, currentDescription]);
+      }
+    }
+  }, [currentDescription, typingIndex, isTyping]);
   const mockCharacter: Character = useMemo(
     () => ({
       id: 1,
@@ -146,7 +171,7 @@ const Home = () => {
   );
 
   const handleOptionSelect = async (selectedOption: string) => {
-    if (!character || isGenerating) return;
+    if (!character || isGenerating || isTyping) return;
     if (selectedOption === "End Adventure") return resetGame();
     if (selectedOption === "Start New Adventure") return startGame();
 
@@ -165,9 +190,7 @@ const Home = () => {
         ending_scenes: character.ending_scenes || [],
         voice_name: character.voice_name || "Alloy",
         language: character.language || "English",
-        starting_prompt: `The user chose: \"${selectedOption}\". Continue the story and provide 3 new choices. Story so far: ${storyHistory
-          .slice(-2)
-          .join(" ")}`,
+        starting_prompt: `The user chose: \"${selectedOption}\". Generate a short prompt for the next choice and 3 concise options. Provide a detailed description of what happens after this choice.`,
         current_scene: currentScene,
         total_scenes: character.no_of_scenes || 5,
       };
@@ -180,26 +203,44 @@ const Home = () => {
 
       const result = await response.json();
       if (result.success) {
-        // Generate a description of the event that happens after the player's choice
-        const eventDescription = `You chose: ${selectedOption}`;
-        const newStory = result.npc_dialogue.join(" ");
+        // Create game turn for logging
+        const gameTurn: GameTurn = {
+          prompt: storyHistory[storyHistory.length - 1] || "",
+          description: result.npc_dialogue.join(" "),
+          options: currentOptions,
+          selected_option: selectedOption,
+        };
 
-        setStoryHistory((prev) => [...prev, eventDescription, newStory]);
+        // Update game log with current turn
+        const updatedGameLog = [...gameLog, gameTurn];
+        setGameLog(updatedGameLog);
+
+        // Start typing animation for the description
+        const description = result.npc_dialogue.join(" ");
+        setCurrentDescription(description);
+        setDisplayedDescription("");
+        setTypingIndex(0);
+        setIsTyping(true);
+
+        // Update story and options - only add user choice, not the description yet
+        const eventDescription = `You chose: ${selectedOption}`;
+        setStoryHistory((prev) => [...prev, eventDescription]);
         setCurrentOptions(result.player_options || []);
-        setCurrentScene((scene) => scene + 1);
+        const nextScene = currentScene + 1;
+        setCurrentScene(nextScene);
 
         // Check if game should end based on scenes or story progression
-        const isNearEnd = currentScene >= (character.no_of_scenes || 5) - 1;
+        const isNearEnd = nextScene >= (character.no_of_scenes || 5) - 1;
         const hasEndingKeywords =
-          newStory.toLowerCase().includes("end") ||
-          newStory.toLowerCase().includes("conclude") ||
-          newStory.toLowerCase().includes("final");
+          description.toLowerCase().includes("end") ||
+          description.toLowerCase().includes("conclude") ||
+          description.toLowerCase().includes("final");
 
         if (isNearEnd || hasEndingKeywords) {
           console.log("🎮 Game approaching ending...");
           console.log("📊 Game Stats:", {
             character: character.character_name,
-            scenes_played: currentScene,
+            scenes_played: nextScene,
             total_scenes: character.no_of_scenes,
             choices_made:
               storyHistory.filter((item) => item.startsWith("You chose:"))
@@ -207,11 +248,30 @@ const Home = () => {
             story_length: storyHistory.join(" ").length,
           });
 
-          // Check if this is the final scene
-          if (currentScene >= (character.no_of_scenes || 5)) {
+          // Check if this is the final scene - use updatedGameLog to ensure we have all turns
+          if (nextScene >= (character.no_of_scenes || 5)) {
             console.log("🏁 GAME ENDED!");
             console.log("📖 Complete Story:", storyHistory.join("\n"));
             console.log("🎭 Character:", character);
+            console.log("🎮 Final Game Log:", updatedGameLog);
+
+            // Save the complete game log to database with all turns including the final one
+            if (updatedGameLog.length > 0) {
+              try {
+                await saveGameLog({
+                  character_id: character.id,
+                  game_summary: updatedGameLog,
+                });
+                console.log(
+                  "✅ Game log saved successfully with",
+                  updatedGameLog.length,
+                  "turns"
+                );
+              } catch (error) {
+                console.error("❌ Failed to save game log:", error);
+              }
+            }
+
             setCurrentOptions([
               "End Adventure",
               "Start New Adventure",
@@ -235,6 +295,11 @@ const Home = () => {
     setCurrentOptions([]);
     setCurrentScene(1);
     setError(null);
+    setGameLog([]);
+    setIsTyping(false);
+    setCurrentDescription("");
+    setDisplayedDescription("");
+    setTypingIndex(0);
   };
 
   const handlePrev = () =>
@@ -283,11 +348,13 @@ const Home = () => {
         >
           <NPCBubble
             message={
-              storyHistory
-                .slice()
-                .reverse()
-                .find((t) => !t.startsWith("You chose:")) ??
-              "Hello! How can I assist you today?"
+              isTyping
+                ? displayedDescription + (displayedDescription ? "" : "...")
+                : storyHistory
+                    .slice()
+                    .reverse()
+                    .find((t) => !t.startsWith("You chose:")) ??
+                  "Hello! How can I assist you today?"
             }
           />
           <div
@@ -380,6 +447,14 @@ const Home = () => {
                 <p className="text-sm leading-relaxed">{text}</p>
               </div>
             ))}
+            {isTyping && (
+              <div className="max-w-[80%] p-3 rounded-xl shadow bg-gray-200 text-gray-900 mr-auto">
+                <p className="text-sm leading-relaxed">
+                  {displayedDescription}
+                  <span className="animate-pulse">|</span>
+                </p>
+              </div>
+            )}
             {isGenerating && (
               <div className="flex items-center justify-center p-4">
                 <Loader2 className="h-5 w-5 animate-spin mr-2" />
@@ -397,6 +472,12 @@ const Home = () => {
                 {error}
               </div>
             )}
+            {isTyping && (
+              <div className="mb-3 p-2 bg-blue-100 border border-blue-300 text-blue-700 rounded text-sm flex items-center">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                The story unfolds...
+              </div>
+            )}
             <h4 className="text-sm font-semibold text-gray-700 mb-3">
               What do you do next?
             </h4>
@@ -405,7 +486,7 @@ const Home = () => {
                 <button
                   key={index}
                   onClick={() => handleOptionSelect(option)}
-                  disabled={isGenerating}
+                  disabled={isGenerating || isTyping}
                   className="w-full text-left p-3 text-sm bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ArrowRight className="inline w-4 h-4 mr-2 text-blue-600" />

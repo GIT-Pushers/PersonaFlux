@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
 import { PlusCircle, Play, Eye, Trash2 } from "lucide-react";
 
 // Define a type for the character data to ensure type safety
@@ -131,13 +132,15 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Character Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              View, manage, and create your characters.
-            </p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Character Dashboard
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                View, manage, and create your characters.
+              </p>
+            </div>
           </div>
           <Button
             size="lg"
